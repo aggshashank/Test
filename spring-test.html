@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Guide to Spring Testing</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .code {
+            background: #f4f4f4;
+            border-left: 3px solid #ccc;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive Guide to Spring Testing</h1>
+
+        <div class="section">
+            <h2>1. Introduction</h2>
+            <p>Spring Testing is an essential part of ensuring your Spring applications are robust, reliable, and maintainable. This guide covers various types of testing in Spring, including unit testing, integration testing, API testing, component testing, Spring Data testing, and orchestration service testing.</p>
+        </div>
+
+        <div class="section">
+            <h2>2. Unit Testing</h2>
+            <p>Unit tests focus on testing individual components in isolation. JUnit and Mockito are commonly used for unit testing in Spring.</p>
+
+            <h3>Example: Testing a Service</h3>
+            <div class="code">
+                <code>
+                import static org.mockito.Mockito.*;<br>
+                import static org.junit.jupiter.api.Assertions.*;<br>
+                import org.junit.jupiter.api.BeforeEach;<br>
+                import org.junit.jupiter.api.Test;<br>
+                import org.mockito.InjectMocks;<br>
+                import org.mockito.Mock;<br>
+                import org.mockito.MockitoAnnotations;<br><br>
+                public class UserServiceTest {<br>
+                    &nbsp;&nbsp;@Mock<br>
+                    &nbsp;&nbsp;private UserRepository userRepository;<br><br>
+                    &nbsp;&nbsp;@InjectMocks<br>
+                    &nbsp;&nbsp;private UserService userService;<br><br>
+                    &nbsp;&nbsp;@BeforeEach<br>
+                    &nbsp;&nbsp;public void setUp() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;MockitoAnnotations.openMocks(this);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testFindUserById() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = new User(1L, "John Doe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;when(userRepository.findById(1L)).thenReturn(Optional.of(user));<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User found = userService.findUserById(1L);<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(found);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", found.getName());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Integration Testing</h2>
+            <p>Integration tests verify the interactions between different components of the application. Spring Boot Test provides annotations like <code>@SpringBootTest</code> to facilitate integration testing.</p>
+
+            <h3>Example: Testing a Spring Boot Application</h3>
+            <div class="code">
+                <code>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.context.SpringBootTest;<br>
+                import org.springframework.boot.test.web.client.TestRestTemplate;<br>
+                import org.springframework.http.ResponseEntity;<br><br>
+                import static org.junit.jupiter.api.Assertions.*;<br><br>
+                @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)<br>
+                public class UserControllerIntegrationTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private TestRestTemplate restTemplate;<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testGetUser() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;ResponseEntity&lt;User&gt; response = restTemplate.getForEntity("/users/1", User.class);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(200, response.getStatusCodeValue());<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", response.getBody().getName());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. API Testing</h2>
+            <p>API tests ensure that the endpoints of your application behave as expected. MockMvc is commonly used for testing Spring MVC controllers.</p>
+
+            <h3>Example: Testing a Controller</h3>
+            <div class="code">
+                <code>
+                import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;<br>
+                import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;<br>
+                import org.junit.jupiter.api.BeforeEach;<br>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;<br>
+                import org.springframework.boot.test.mock.mockito.MockBean;<br>
+                import org.springframework.test.web.servlet.MockMvc;<br><br>
+                @WebMvcTest(UserController.class)<br>
+                public class UserControllerTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private MockMvc mockMvc;<br><br>
+                    &nbsp;&nbsp;@MockBean<br>
+                    &nbsp;&nbsp;private UserService userService;<br><br>
+                    &nbsp;&nbsp;@BeforeEach<br>
+                    &nbsp;&nbsp;public void setUp() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = new User(1L, "John Doe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;when(userService.findUserById(1L)).thenReturn(user);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testGetUser() throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockMvc.perform(get("/users/1"))<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(status().isOk())<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(jsonPath("$.name").value("John Doe"));<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. Component Testing</h2>
+            <p>Component tests focus on individual components or groups of related components. Use <code>@SpringBootTest</code> with specific configurations for component testing.</p>
+
+            <h3>Example: Testing a Component</h3>
+            <div class="code">
+                <code>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.context.SpringBootTest;<br>
+                import org.springframework.test.context.TestPropertySource;<br><br>
+                @SpringBootTest<br>
+                @TestPropertySource(locations = "classpath:application-test.properties")<br>
+                public class UserComponentTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private UserService userService;<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testUserComponent() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = userService.findUserById(1L);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(user);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", user.getName());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. Spring Data Testing</h2>
+            <p>Spring Data testing involves testing repositories and data access layers. Use embedded databases like H2 for testing.</p>
+
+            <h3>Example: Testing a MongoDB Repository</h3>
+            <div class="code">
+                <code>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;<br>
+                import org.springframework.boot.test.autoconfigure.data.mongo.AutoConfigureDataMongo;<br>
+                import static org.junit.jupiter.api.Assertions.*;<br><br>
+                @DataMongoTest<br>
+                public class UserRepositoryTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private UserRepository userRepository;<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testFindByUsername() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = new User(1L, "johndoe", "John Doe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;userRepository.save(user);<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User found = userRepository.findByUsername("johndoe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(found);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", found.getName());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+
+            <h3>Example: Testing an Oracle Repository</h3>
+            <div class="code">
+                <code>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;<br>
+                import org.springframework.test.context.TestPropertySource;<br>
+                import static org.junit.jupiter.api.Assertions.*;<br><br>
+                @DataJpaTest<br>
+                @TestPropertySource(locations = "classpath:application-test.properties")<br>
+                public class UserRepositoryOracleTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private UserRepository userRepository;<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testFindByUsername() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = new User(1L, "johndoe", "John Doe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;userRepository.save(user);<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User found = userRepository.findByUsername("johndoe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(found);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", found.getName());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. Bean Validation Testing</h2>
+            <p>Testing bean validation involves verifying that the validation constraints on your beans are working as expected.</p>
+
+            <h3>Example: Testing Bean Validation</h3>
+            <div class="code">
+                <code>
+                import static org.junit.jupiter.api.Assertions.*;<br>
+                import org.junit.jupiter.api.BeforeEach;<br>
+                import org.junit.jupiter.api.Test;<br>
+                import javax.validation.Validation;<br>
+                import javax.validation.Validator;<br>
+                import javax.validation.ValidatorFactory;<br>
+                import javax.validation.ConstraintViolation;<br><br>
+                public class UserValidationTest {<br>
+                    &nbsp;&nbsp;private Validator validator;<br><br>
+                    &nbsp;&nbsp;@BeforeEach<br>
+                    &nbsp;&nbsp;public void setUp() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;ValidatorFactory factory = Validation.buildDefaultValidatorFactory();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;validator = factory.getValidator();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testInvalidUser() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = new User(); // missing mandatory fields<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Set&lt;ConstraintViolation&lt;User&gt;&gt; violations = validator.validate(user);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertFalse(violations.isEmpty());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. Orchestration Service Testing with MockWebServer</h2>
+            <p>MockWebServer is a library that helps you test HTTP clients by mocking downstream services.</p>
+
+            <h3>Example: Testing with MockWebServer</h3>
+            <div class="code">
+                <code>
+                import static org.junit.jupiter.api.Assertions.*;<br>
+                import org.junit.jupiter.api.AfterEach;<br>
+                import org.junit.jupiter.api.BeforeEach;<br>
+                import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.context.SpringBootTest;<br>
+                import okhttp3.mockwebserver.MockResponse;<br>
+                import okhttp3.mockwebserver.MockWebServer;<br><br>
+                @SpringBootTest<br>
+                public class OrchestrationServiceTest {<br>
+                    &nbsp;&nbsp;private MockWebServer mockWebServer;<br><br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private OrchestrationService orchestrationService;<br><br>
+                    &nbsp;&nbsp;@BeforeEach<br>
+                    &nbsp;&nbsp;public void setUp() throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockWebServer = new MockWebServer();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockWebServer.start();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;@AfterEach<br>
+                    &nbsp;&nbsp;public void tearDown() throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockWebServer.shutdown();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testOrchestrationService() throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockWebServer.enqueue(new MockResponse().setBody("{\"status\":\"success\"}").addHeader("Content-Type", "application/json"));<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;String response = orchestrationService.callExternalService(mockWebServer.url("/").toString());<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("success", response);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>9. Best Practices</h2>
+            <ul>
+                <li>Write tests before writing the implementation code (TDD).</li>
+                <li>Keep tests small and focused on a single functionality.</li>
+                <li>Use meaningful test names to describe the test purpose.</li>
+                <li>Organize tests in a similar structure to your main codebase.</li>
+                <li>Mock dependencies to isolate the unit under test.</li>
+                <li>Use embedded databases for data access layer testing.</li>
+                <li>Automate tests in your CI/CD pipeline.</li>
+                <li>Keep tests fast to get quick feedback on code changes.</li>
+                <li>Ensure tests are repeatable and can run in any environment.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>10. References</h2>
+            <ul>
+                <li><a href="https://junit.org/junit5/">JUnit 5</a> - Official website for JUnit 5</li>
+                <li><a href="https://site.mockito.org/">Mockito</a> - Official website for Mockito</li>
+                <li><a href="https://spring.io/projects/spring-boot">Spring Boot</a> - Official Spring Boot documentation</li>
+                <li><a href="https://docs.spring.io/spring-framework/docs/current/reference/html/testing.html">Spring Testing Documentation</a> - Official Spring Framework testing documentation</li>
+                <li><a href="https://github.com/square/okhttp/tree/master/mockwebserver">MockWebServer</a> - GitHub repository for MockWebServer</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
