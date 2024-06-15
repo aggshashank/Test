@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spring Web MVC Flow for RESTful API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+        }
+        .step {
+            margin-bottom: 20px;
+        }
+        .code {
+            background: #f4f4f4;
+            border-left: 3px solid #ccc;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        .step-title {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Spring Web MVC Flow for RESTful API</h1>
+
+        <div class="step">
+            <div class="step-title">1. Client Sends Request</div>
+            <p>The client (e.g., a web browser, Postman, or any HTTP client) sends an HTTP request to the server. Example:</p>
+            <div class="code">
+                <code>GET /api/students/1 HTTP/1.1<br>
+                Host: localhost:8080</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">2. DispatcherServlet Receives Request</div>
+            <p>The <code>DispatcherServlet</code> is the front controller that receives the request. It is configured in the <code>web.xml</code> file or automatically by Spring Boot.</p>
+            <div class="code">
+                <code>&lt;servlet&gt;<br>
+                    &nbsp;&nbsp;&lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;<br>
+                    &nbsp;&nbsp;&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;<br>
+                    &nbsp;&nbsp;&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;<br>
+                &lt;/servlet&gt;<br>
+                &lt;servlet-mapping&gt;<br>
+                    &nbsp;&nbsp;&lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;<br>
+                    &nbsp;&nbsp;&lt;url-pattern&gt;/&lt;/url-pattern&gt;<br>
+                &lt;/servlet-mapping&gt;</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">3. DispatcherServlet Delegates to HandlerMapping</div>
+            <p>The <code>DispatcherServlet</code> consults the <code>HandlerMapping</code> to find the appropriate controller method to handle the request.</p>
+            <div class="code">
+                <code>@RestController<br>
+                @RequestMapping("/api/students")<br>
+                public class StudentController {<br>
+                    &nbsp;&nbsp;// Controller methods<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">4. Controller Method Executes</div>
+            <p>The controller method mapped to the URL executes the business logic, often interacting with the service layer.</p>
+            <div class="code">
+                <code>@GetMapping("/{id}")<br>
+                public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
+                    &nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
+                    &nbsp;&nbsp;return ResponseEntity.ok().body(student);<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">5. Service Layer (Business Logic)</div>
+            <p>The service layer contains the business logic. It interacts with the repository layer to fetch or save data.</p>
+            <div class="code">
+                <code>@Service<br>
+                public class StudentService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private StudentRepository studentRepository;<br>
+                    <br>
+                    &nbsp;&nbsp;public Optional&lt;Student&gt; getStudentById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return studentRepository.findById(id);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">6. Repository Layer (Data Access)</div>
+            <p>The repository layer handles data access, typically interacting with a database. In this example, it's a simple in-memory list.</p>
+            <div class="code">
+                <code>@Repository<br>
+                public class StudentRepository {<br>
+                    &nbsp;&nbsp;private List&lt;Student&gt; students = new ArrayList&lt;&gt;();<br>
+                    <br>
+                    &nbsp;&nbsp;public Optional&lt;Student&gt; findById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return students.stream().filter(student -&gt; student.getId().equals(id)).findFirst();<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">7. Response Returned to DispatcherServlet</div>
+            <p>The controller method returns a <code>ResponseEntity</code> object containing the HTTP response. This response is sent back to the <code>DispatcherServlet</code>.</p>
+            <div class="code">
+                <code>return ResponseEntity.ok().body(student);</code>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="step-title">8. DispatcherServlet Sends Response to Client</div>
+            <p>The <code>DispatcherServlet</code> sends the HTTP response back to the client. The client receives the JSON representation of the requested resource.</p>
+            <div class="code">
+                <code>HTTP/1.1 200 OK<br>
+                Content-Type: application/json<br>
+                <br>
+                {<br>
+                    &nbsp;&nbsp;"id": 1,<br>
+                    &nbsp;&nbsp;"name": "John Doe",<br>
+                    &nbsp;&nbsp;"email": "john.doe@example.com"<br>
+                }</code>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
