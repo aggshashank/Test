@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Web MVC Flow for RESTful API</title>
+    <title>Spring Web MVC for RESTful APIs</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,8 +14,11 @@
             margin: 0 auto;
             padding: 20px;
         }
-        h1 {
+        h1, h2, h3, h4 {
             text-align: center;
+        }
+        .section {
+            margin-bottom: 40px;
         }
         .step {
             margin-bottom: 20px;
@@ -33,61 +36,31 @@
 </head>
 <body>
     <div class="container">
-        <h1>Spring Web MVC Flow for RESTful API</h1>
+        <h1>Comprehensive Guide to Spring Web MVC for RESTful APIs</h1>
 
-        <div class="step">
-            <div class="step-title">1. Client Sends Request</div>
-            <p>The client (e.g., a web browser, Postman, or any HTTP client) sends an HTTP request to the server. Example:</p>
-            <div class="code">
-                <code>GET /api/students/1 HTTP/1.1<br>
-                Host: localhost:8080</code>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-title">2. DispatcherServlet Receives Request</div>
-            <p>The <code>DispatcherServlet</code> is the front controller that receives the request. It is configured in the <code>web.xml</code> file or automatically by Spring Boot.</p>
-            <div class="code">
-                <code>&lt;servlet&gt;<br>
-                    &nbsp;&nbsp;&lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;<br>
-                    &nbsp;&nbsp;&lt;servlet-class&gt;org.springframework.web.servlet.DispatcherServlet&lt;/servlet-class&gt;<br>
-                    &nbsp;&nbsp;&lt;load-on-startup&gt;1&lt;/load-on-startup&gt;<br>
-                &lt;/servlet&gt;<br>
-                &lt;servlet-mapping&gt;<br>
-                    &nbsp;&nbsp;&lt;servlet-name&gt;dispatcher&lt;/servlet-name&gt;<br>
-                    &nbsp;&nbsp;&lt;url-pattern&gt;/&lt;/url-pattern&gt;<br>
-                &lt;/servlet-mapping&gt;</code>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-title">3. DispatcherServlet Delegates to HandlerMapping</div>
-            <p>The <code>DispatcherServlet</code> consults the <code>HandlerMapping</code> to find the appropriate controller method to handle the request.</p>
+        <div class="section">
+            <h2>1. Layers Architecture</h2>
+            <p>Spring Web MVC follows a layered architecture to separate concerns:</p>
+            <h3>Controller Layer</h3>
+            <p>Handles HTTP requests and delegates to the service layer. Example:</p>
             <div class="code">
                 <code>@RestController<br>
                 @RequestMapping("/api/students")<br>
                 public class StudentController {<br>
-                    &nbsp;&nbsp;// Controller methods<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private StudentService studentService;<br>
+                    <br>
+                    &nbsp;&nbsp;@GetMapping("/{id}")<br>
+                    &nbsp;&nbsp;public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.ok().body(student);<br>
+                    &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-        </div>
 
-        <div class="step">
-            <div class="step-title">4. Controller Method Executes</div>
-            <p>The controller method mapped to the URL executes the business logic, often interacting with the service layer.</p>
-            <div class="code">
-                <code>@GetMapping("/{id}")<br>
-                public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
-                    &nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
-                    &nbsp;&nbsp;return ResponseEntity.ok().body(student);<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-title">5. Service Layer (Business Logic)</div>
-            <p>The service layer contains the business logic. It interacts with the repository layer to fetch or save data.</p>
+            <h3>Service Layer</h3>
+            <p>Contains business logic. Example:</p>
             <div class="code">
                 <code>@Service<br>
                 public class StudentService {<br>
@@ -99,11 +72,9 @@
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-        </div>
 
-        <div class="step">
-            <div class="step-title">6. Repository Layer (Data Access)</div>
-            <p>The repository layer handles data access, typically interacting with a database. In this example, it's a simple in-memory list.</p>
+            <h3>Repository Layer</h3>
+            <p>Handles data access. Example:</p>
             <div class="code">
                 <code>@Repository<br>
                 public class StudentRepository {<br>
@@ -116,29 +87,179 @@
             </div>
         </div>
 
-        <div class="step">
-            <div class="step-title">7. Response Returned to DispatcherServlet</div>
-            <p>The controller method returns a <code>ResponseEntity</code> object containing the HTTP response. This response is sent back to the <code>DispatcherServlet</code>.</p>
+        <div class="section">
+            <h2>2. Bean Validation</h2>
+            <p>Spring MVC integrates with JSR-380 (Bean Validation 2.0) for validating beans. Example:</p>
+            <h3>Model with Validation Annotations</h3>
             <div class="code">
-                <code>return ResponseEntity.ok().body(student);</code>
-            </div>
-        </div>
-
-        <div class="step">
-            <div class="step-title">8. DispatcherServlet Sends Response to Client</div>
-            <p>The <code>DispatcherServlet</code> sends the HTTP response back to the client. The client receives the JSON representation of the requested resource.</p>
-            <div class="code">
-                <code>HTTP/1.1 200 OK<br>
-                Content-Type: application/json<br>
+                <code>import javax.validation.constraints.Email;<br>
+                import javax.validation.constraints.NotEmpty;<br>
                 <br>
-                {<br>
-                    &nbsp;&nbsp;"id": 1,<br>
-                    &nbsp;&nbsp;"name": "John Doe",<br>
-                    &nbsp;&nbsp;"email": "john.doe@example.com"<br>
+                public class Student {<br>
+                    &nbsp;&nbsp;private Long id;<br>
+                    <br>
+                    &nbsp;&nbsp;@NotEmpty(message = "Name is required")<br>
+                    &nbsp;&nbsp;private String name;<br>
+                    <br>
+                    &nbsp;&nbsp;@Email(message = "Email should be valid")<br>
+                    &nbsp;&nbsp;@NotEmpty(message = "Email is required")<br>
+                    &nbsp;&nbsp;private String email;<br>
+                    <br>
+                    &nbsp;&nbsp;// Getters and Setters<br>
+                }</code>
+            </div>
+
+            <h3>Controller with Validation</h3>
+            <div class="code">
+                <code>@PostMapping<br>
+                public ResponseEntity&lt;Student&gt; addStudent(@Valid @RequestBody Student student, BindingResult result) {<br>
+                    &nbsp;&nbsp;if (result.hasErrors()) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;throw new ValidationException(result);<br>
+                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;studentService.addStudent(student);<br>
+                    &nbsp;&nbsp;return ResponseEntity.status(HttpStatus.CREATED).body(student);<br>
                 }</code>
             </div>
         </div>
 
+        <div class="section">
+            <h2>3. Global Exception Handling</h2>
+            <p>Spring MVC allows global exception handling using @ControllerAdvice. Example:</p>
+            <div class="code">
+                <code>@ControllerAdvice<br>
+                public class GlobalExceptionHandler {<br>
+                    &nbsp;&nbsp;@ExceptionHandler(ResourceNotFoundException.class)<br>
+                    &nbsp;&nbsp;public ResponseEntity&lt;String&gt; handleResourceNotFoundException(ResourceNotFoundException ex) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());<br>
+                    &nbsp;&nbsp;}<br>
+                    <br>
+                    &nbsp;&nbsp;@ExceptionHandler(ValidationException.class)<br>
+                    &nbsp;&nbsp;public ResponseEntity&lt;String&gt; handleValidationException(ValidationException ex) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Downstream Connectivity</h2>
+            <p>Spring MVC can connect to downstream services using RestTemplate or WebClient. Example with RestTemplate:</p>
+            <div class="code">
+                <code>@Service<br>
+                public class DownstreamService {<br>
+                    &nbsp;&nbsp;private final RestTemplate restTemplate;<br>
+                    <br>
+                    &nbsp;&nbsp;public DownstreamService(RestTemplate restTemplate) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.restTemplate = restTemplate;<br>
+                    &nbsp;&nbsp;}<br>
+                    <br>
+                    &nbsp;&nbsp;public String getExternalData() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;String url = "https://api.example.com/data";<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;ResponseEntity&lt;String&gt; response = restTemplate.getForEntity(url, String.class);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return response.getBody();<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+
+            <h3>Configuration for RestTemplate</h3>
+            <div class="code">
+                <code>@Configuration<br>
+                public class AppConfig {<br>
+                    &nbsp;&nbsp;@Bean<br>
+                    &nbsp;&nbsp;public RestTemplate restTemplate(RestTemplateBuilder builder) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return builder.build();<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. Security</h2>
+            <p>Spring Security provides comprehensive security services for Java applications. Example configuration:</p>
+            <div class="code">
+                <code>@EnableWebSecurity<br>
+                public class SecurityConfig extends WebSecurityConfigurerAdapter {<br>
+                    &nbsp;&nbsp;@Override<br>
+                    &nbsp;&nbsp;protected void configure(HttpSecurity http) throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;http<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.authorizeRequests()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.antMatchers("/api/**").authenticated()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.and()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.httpBasic();<br>
+                    &nbsp;&nbsp;}<br>
+                    <br>
+                    &nbsp;&nbsp;@Override<br>
+                    &nbsp;&nbsp;protected void configure(AuthenticationManagerBuilder auth) throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;auth.inMemoryAuthentication()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.withUser("user").password("{noop}password").roles("USER");<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. Testing</h2>
+            <p>Spring MVC provides support for testing controllers and services. Example with JUnit and MockMvc:</p>
+            <h3>Controller Test</h3>
+            <div class="code">
+                <code>@RunWith(SpringRunner.class)<br>
+                @WebMvcTest(StudentController.class)<br>
+                public class StudentControllerTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private MockMvc mockMvc;<br>
+                    <br>
+                    &nbsp;&nbsp;@MockBean<br>
+                    &nbsp;&nbsp;private StudentService studentService;<br>
+                    <br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testGetStudentById() throws Exception {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = new Student(1L, "John Doe", "john.doe@example.com");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;when(studentService.getStudentById(1L)).thenReturn(Optional.of(student));<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;mockMvc.perform(get("/api/students/1"))<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(status().isOk())<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(jsonPath("$.name").value("John Doe"));<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. Other Important Features</h2>
+            <h3>Content Negotiation</h3>
+            <p>Spring MVC supports content negotiation to serve different data formats like JSON and XML. Example configuration:</p>
+            <div class="code">
+                <code>@Configuration<br>
+                public class WebConfig implements WebMvcConfigurer {<br>
+                    &nbsp;&nbsp;@Override<br>
+                    &nbsp;&nbsp;public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;configurer.favorPathExtension(false)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.favorParameter(true)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.parameterName("format")<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.defaultContentType(MediaType.APPLICATION_JSON)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.mediaType("json", MediaType.APPLICATION_JSON)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.mediaType("xml", MediaType.APPLICATION_XML);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+
+            <h3>HATEOAS</h3>
+            <p>Hypermedia as the Engine of Application State (HATEOAS) is used to create REST APIs that are discoverable. Example:</p>
+            <div class="code">
+                <code>@RestController<br>
+                public class StudentController {<br>
+                    &nbsp;&nbsp;@GetMapping("/{id}")<br>
+                    &nbsp;&nbsp;public EntityModel&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;EntityModel&lt;Student&gt; resource = EntityModel.of(student);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).getAllStudents());<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;resource.add(linkTo.withRel("all-students"));<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return resource;<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
     </div>
 </body>
 </html>
