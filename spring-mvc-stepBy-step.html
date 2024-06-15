@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Core Best Practices</title>
+    <title>Complete Guide to Test Driven Development in Java</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -30,247 +30,203 @@
 </head>
 <body>
     <div class="container">
-        <h1>Spring Core Best Practices</h1>
+        <h1>Complete Guide to Test Driven Development in Java</h1>
 
         <div class="section">
-            <h2>1. Use Dependency Injection</h2>
-            <p>Always prefer dependency injection (constructor or setter injection) over direct instantiation of objects to promote loose coupling and easier testing.</p>
-            <h3>Constructor Injection Example:</h3>
+            <h2>1. Introduction to Test Driven Development (TDD)</h2>
+            <p>Test Driven Development (TDD) is a software development process where you write tests before writing the code that needs to pass the tests. The process involves the following steps:</p>
+            <ol>
+                <li>Write a failing test</li>
+                <li>Write the minimum code required to pass the test</li>
+                <li>Refactor the code while ensuring all tests pass</li>
+            </ol>
+            <p>The main benefits of TDD are better code quality, fewer bugs, and improved design.</p>
+        </div>
+
+        <div class="section">
+            <h2>2. Setting Up the Environment</h2>
+            <p>To get started with TDD in Java, you'll need the following tools:</p>
+            <ul>
+                <li>Java Development Kit (JDK)</li>
+                <li>An Integrated Development Environment (IDE) like IntelliJ IDEA or Eclipse</li>
+                <li>JUnit for testing</li>
+                <li>Maven or Gradle for build automation</li>
+            </ul>
+
+            <h3>Setting Up a Maven Project</h3>
             <div class="code">
-                <code>@Service<br>
-                public class UserService {<br>
-                    &nbsp;&nbsp;private final UserRepository userRepository;<br>
-                    <br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;public UserService(UserRepository userRepository) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;this.userRepository = userRepository;<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
+                <code>mvn archetype:generate -DgroupId=com.example -DartifactId=tdd-example -DarchetypeArtifactId=maven-archetype-quickstart -DinteractiveMode=false</code>
             </div>
-            <h3>Setter Injection Example:</h3>
+
+            <h3>Adding JUnit Dependency to Maven</h3>
             <div class="code">
-                <code>@Service<br>
-                public class UserService {<br>
-                    &nbsp;&nbsp;private UserRepository userRepository;<br>
-                    <br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;public void setUserRepository(UserRepository userRepository) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;this.userRepository = userRepository;<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
+                <code>&lt;dependencies&gt;<br>
+                    &nbsp;&nbsp;&lt;dependency&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;junit&lt;/groupId&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;junit&lt;/artifactId&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;version&gt;4.13.2&lt;/version&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;scope&gt;test&lt;/scope&gt;<br>
+                    &nbsp;&nbsp;&lt;/dependency&gt;<br>
+                &lt;/dependencies&gt;</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>2. Use @ComponentScan and @Configuration</h2>
-            <p>Use <code>@ComponentScan</code> to automatically discover and register beans, and <code>@Configuration</code> to define configuration classes.</p>
-            <h3>Example:</h3>
+            <h2>3. Writing Your First Test</h2>
+            <h3>Step 1: Write a Failing Test</h3>
+            <p>Let's write a simple test for a Calculator class that adds two numbers.</p>
             <div class="code">
-                <code>@Configuration<br>
-                @ComponentScan(basePackages = "com.example.myapp")<br>
-                public class AppConfig {<br>
-                    &nbsp;&nbsp;// Define additional beans here if necessary<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>3. Use @Value and @PropertySource for External Configuration</h2>
-            <p>Externalize configuration using property files and the <code>@Value</code> annotation to inject values.</p>
-            <h3>Example:</h3>
-            <div class="code">
-                <code>@Configuration<br>
-                @PropertySource("classpath:application.properties")<br>
-                public class AppConfig {<br>
-                    &nbsp;&nbsp;@Value("${app.name}")<br>
-                    &nbsp;&nbsp;private String appName;<br>
-                    <br>
-                    &nbsp;&nbsp;// Use appName in your beans<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>4. Use @Profile for Environment Specific Beans</h2>
-            <p>Define beans that should only be available in specific environments using the <code>@Profile</code> annotation.</p>
-            <h3>Example:</h3>
-            <div class="code">
-                <code>@Configuration<br>
-                public class DataSourceConfig {<br>
-                    &nbsp;&nbsp;@Bean<br>
-                    &nbsp;&nbsp;@Profile("development")<br>
-                    &nbsp;&nbsp;public DataSource developmentDataSource() {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return new HikariDataSource();<br>
-                    &nbsp;&nbsp;}<br>
-                    <br>
-                    &nbsp;&nbsp;@Bean<br>
-                    &nbsp;&nbsp;@Profile("production")<br>
-                    &nbsp;&nbsp;public DataSource productionDataSource() {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return new HikariDataSource();<br>
+                <code>package com.example;<br><br>
+                import static org.junit.Assert.assertEquals;<br>
+                import org.junit.Test;<br><br>
+                public class CalculatorTest {<br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testAdd() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Calculator calculator = new Calculator();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;int result = calculator.add(2, 3);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(5, result);<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-        </div>
 
-        <div class="section">
-            <h2>5. Use Constructor Injection for Mandatory Dependencies</h2>
-            <p>Always use constructor injection for mandatory dependencies to ensure the required dependencies are available.</p>
-            <h3>Example:</h3>
+            <h3>Step 2: Write the Minimum Code to Pass the Test</h3>
+            <p>Now, let's write the Calculator class to make the test pass.</p>
             <div class="code">
-                <code>@Service<br>
-                public class OrderService {<br>
-                    &nbsp;&nbsp;private final OrderRepository orderRepository;<br>
-                    <br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;public OrderService(OrderRepository orderRepository) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;this.orderRepository = orderRepository;<br>
+                <code>package com.example;<br><br>
+                public class Calculator {<br>
+                    &nbsp;&nbsp;public int add(int a, int b) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return a + b;<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
+
+            <h3>Step 3: Refactor</h3>
+            <p>Refactor the code if necessary. In this simple example, there may not be much to refactor.</p>
         </div>
 
         <div class="section">
-            <h2>6. Avoid Field Injection</h2>
-            <p>Field injection makes testing difficult and reduces code readability. Prefer constructor or setter injection.</p>
-            <h3>Bad Example (Field Injection):</h3>
+            <h2>4. Writing More Complex Tests</h2>
+            <h3>Step 1: Write a Failing Test</h3>
+            <p>Let's extend the Calculator to include a method for subtraction.</p>
             <div class="code">
-                <code>@Service<br>
-                public class ProductService {<br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private ProductRepository productRepository;<br>
-                }</code>
-            </div>
-
-            <h3>Good Example (Constructor Injection):</h3>
-            <div class="code">
-                <code>@Service<br>
-                public class ProductService {<br>
-                    &nbsp;&nbsp;private final ProductRepository productRepository;<br>
-                    <br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;public ProductService(ProductRepository productRepository) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;this.productRepository = productRepository;<br>
+                <code>package com.example;<br><br>
+                import static org.junit.Assert.assertEquals;<br>
+                import org.junit.Test;<br><br>
+                public class CalculatorTest {<br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testSubtract() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Calculator calculator = new Calculator();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;int result = calculator.subtract(5, 3);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(2, result);<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-        </div>
 
-        <div class="section">
-            <h2>7. Use Spring Profiles to Manage Different Environments</h2>
-            <p>Utilize Spring profiles to configure and manage beans for different environments (e.g., development, testing, production).</p>
-            <h3>Example:</h3>
+            <h3>Step 2: Write the Minimum Code to Pass the Test</h3>
             <div class="code">
-                <code>@Configuration<br>
-                @Profile("test")<br>
-                public class TestConfig {<br>
-                    &nbsp;&nbsp;@Bean<br>
-                    &nbsp;&nbsp;public DataSource dataSource() {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return new EmbeddedDatabaseBuilder()<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setType(EmbeddedDatabaseType.H2)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.build();<br>
+                <code>package com.example;<br><br>
+                public class Calculator {<br>
+                    &nbsp;&nbsp;public int add(int a, int b) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return a + b;<br>
+                    &nbsp;&nbsp;}<br>
+                    <br>
+                    &nbsp;&nbsp;public int subtract(int a, int b) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return a - b;<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
+
+            <h3>Step 3: Refactor</h3>
+            <p>Refactor the code if necessary to improve the design or performance.</p>
         </div>
 
         <div class="section">
-            <h2>8. Use @Transactional for Transaction Management</h2>
-            <p>Annotate methods or classes with <code>@Transactional</code> to handle transaction management declaratively.</p>
-            <h3>Example:</h3>
+            <h2>5. Advanced TDD Practices</h2>
+            <h3>Mocking Dependencies</h3>
+            <p>Use mocking frameworks like Mockito to isolate the unit under test.</p>
             <div class="code">
-                <code>@Service<br>
-                public class PaymentService {<br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private PaymentRepository paymentRepository;<br>
+                <code>package com.example;<br><br>
+                import static org.mockito.Mockito.*;<br>
+                import org.junit.Before;<br>
+                import org.junit.Test;<br>
+                import org.mockito.InjectMocks;<br>
+                import org.mockito.Mock;<br>
+                import org.mockito.MockitoAnnotations;<br><br>
+                public class CalculatorServiceTest {<br>
+                    &nbsp;&nbsp;@Mock<br>
+                    &nbsp;&nbsp;private Calculator calculator;<br>
                     <br>
-                    &nbsp;&nbsp;@Transactional<br>
-                    &nbsp;&nbsp;public void processPayment(Payment payment) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;paymentRepository.save(payment);<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;// Additional transactional operations<br>
+                    &nbsp;&nbsp;@InjectMocks<br>
+                    &nbsp;&nbsp;private CalculatorService calculatorService;<br>
+                    <br>
+                    &nbsp;&nbsp;@Before<br>
+                    &nbsp;&nbsp;public void setUp() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;MockitoAnnotations.initMocks(this);<br>
                     &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>9. Use Spring’s Testing Support</h2>
-            <p>Use Spring's testing support for writing unit and integration tests. Utilize annotations like <code>@RunWith(SpringRunner.class)</code>, <code>@SpringBootTest</code>, and <code>@MockBean</code>.</p>
-            <h3>Example:</h3>
-            <div class="code">
-                <code>@RunWith(SpringRunner.class)<br>
-                @SpringBootTest<br>
-                public class UserServiceTest {<br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private UserService userService;<br>
-                    <br>
-                    &nbsp;&nbsp;@MockBean<br>
-                    &nbsp;&nbsp;private UserRepository userRepository;<br>
                     <br>
                     &nbsp;&nbsp;@Test<br>
-                    &nbsp;&nbsp;public void testFindUserById() {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;when(userRepository.findById(1L)).thenReturn(Optional.of(new User(1L, "John Doe")));<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;User user = userService.findUserById(1L);<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(user);<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", user.getName());<br>
+                    &nbsp;&nbsp;public void testAdd() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;when(calculator.add(2, 3)).thenReturn(5);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;int result = calculatorService.add(2, 3);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(5, result);<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-        </div>
 
-        <div class="section">
-            <h2>10. Use @Cacheable for Caching</h2>
-            <p>Use the <code>@Cacheable</code> annotation to enable caching for methods that are frequently called with the same parameters.</p>
-            <h3>Example:</h3>
+            <h3>Integration Testing</h3>
+            <p>Write integration tests to test the interaction between different components.</p>
             <div class="code">
-                <code>@Service<br>
-                public class ProductService {<br>
+                <code>package com.example;<br><br>
+                import org.junit.Test;<br>
+                import org.junit.runner.RunWith;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.context.SpringBootTest;<br>
+                import org.springframework.test.context.junit4.SpringRunner;<br><br>
+                @RunWith(SpringRunner.class)<br>
+                @SpringBootTest<br>
+                public class CalculatorIntegrationTest {<br>
                     &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private ProductRepository productRepository;<br>
+                    &nbsp;&nbsp;private CalculatorService calculatorService;<br>
                     <br>
-                    &nbsp;&nbsp;@Cacheable("products")<br>
-                    &nbsp;&nbsp;public Product getProductById(Long id) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return productRepository.findById(id).orElse(null);<br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testAdd() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;int result = calculatorService.add(2, 3);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(5, result);<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>11. Use @Async for Asynchronous Processing</h2>
-            <p>Enable asynchronous processing using the <code>@Async</code> annotation and <code>@EnableAsync</code> configuration.</p>
-            <h3>Example:</h3>
+            <h2>6. Continuous Integration</h2>
+            <p>Integrate your tests with a CI/CD pipeline using tools like Jenkins or GitHub Actions to automatically run tests on every commit.</p>
+            <h3>Example Jenkins Pipeline</h3>
             <div class="code">
-                <code>@Configuration<br>
-                @EnableAsync<br>
-                public class AsyncConfig {<br>
-                    &nbsp;&nbsp;// Additional configuration if needed<br>
-                }</code>
-            </div>
-            <div class="code">
-                <code>@Service<br>
-                public class NotificationService {<br>
-                    &nbsp;&nbsp;@Async<br>
-                    &nbsp;&nbsp;public void sendNotification(String message) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;// Send notification asynchronously<br>
+                <code>pipeline {<br>
+                    &nbsp;&nbsp;agent any<br>
+                    <br>
+                    &nbsp;&nbsp;stages {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;stage('Build') {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;steps {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sh 'mvn clean package'<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        <br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;stage('Test') {<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;steps {<br>
+                                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sh 'mvn test'<br>
+                            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;}<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>12. Use Spring Boot for Rapid Development</h2>
-            <p>Leverage Spring Boot for rapid application development, automatic configuration, and production-ready features.</p>
-            <h3>Example:</h3>
-            <div class="code">
-                <code>@SpringBootApplication<br>
-                public class Application {<br>
-                    &nbsp;&nbsp;public static void main(String[] args) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;SpringApplication.run(Application.class, args);<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
+            <h2>7. Conclusion</h2>
+            <p>Test Driven Development (TDD) helps in writing clean, maintainable, and bug-free code. By following the TDD process, you can ensure that your code meets the requirements and is well-tested.</p>
+            <p>Keep practicing TDD to become proficient in writing tests and developing software that is robust and reliable.</p>
         </div>
-
     </div>
 </body>
 </html>
