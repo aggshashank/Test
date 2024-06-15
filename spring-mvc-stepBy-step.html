@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spring Web MVC for RESTful APIs</title>
+    <title>Spring Core Best Practices</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,14 +14,11 @@
             margin: 0 auto;
             padding: 20px;
         }
-        h1, h2, h3, h4 {
+        h1, h2, h3 {
             text-align: center;
         }
         .section {
             margin-bottom: 40px;
-        }
-        .step {
-            margin-bottom: 20px;
         }
         .code {
             background: #f4f4f4;
@@ -29,237 +26,251 @@
             padding: 10px;
             overflow-x: auto;
         }
-        .step-title {
-            font-weight: bold;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Comprehensive Guide to Spring Web MVC for RESTful APIs</h1>
+        <h1>Spring Core Best Practices</h1>
 
         <div class="section">
-            <h2>1. Layers Architecture</h2>
-            <p>Spring Web MVC follows a layered architecture to separate concerns:</p>
-            <h3>Controller Layer</h3>
-            <p>Handles HTTP requests and delegates to the service layer. Example:</p>
-            <div class="code">
-                <code>@RestController<br>
-                @RequestMapping("/api/students")<br>
-                public class StudentController {<br>
-                    &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private StudentService studentService;<br>
-                    <br>
-                    &nbsp;&nbsp;@GetMapping("/{id}")<br>
-                    &nbsp;&nbsp;public ResponseEntity&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.ok().body(student);<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
-
-            <h3>Service Layer</h3>
-            <p>Contains business logic. Example:</p>
+            <h2>1. Use Dependency Injection</h2>
+            <p>Always prefer dependency injection (constructor or setter injection) over direct instantiation of objects to promote loose coupling and easier testing.</p>
+            <h3>Constructor Injection Example:</h3>
             <div class="code">
                 <code>@Service<br>
-                public class StudentService {<br>
+                public class UserService {<br>
+                    &nbsp;&nbsp;private final UserRepository userRepository;<br>
+                    <br>
                     &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private StudentRepository studentRepository;<br>
-                    <br>
-                    &nbsp;&nbsp;public Optional&lt;Student&gt; getStudentById(Long id) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return studentRepository.findById(id);<br>
+                    &nbsp;&nbsp;public UserService(UserRepository userRepository) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.userRepository = userRepository;<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
-
-            <h3>Repository Layer</h3>
-            <p>Handles data access. Example:</p>
-            <div class="code">
-                <code>@Repository<br>
-                public class StudentRepository {<br>
-                    &nbsp;&nbsp;private List&lt;Student&gt; students = new ArrayList&lt;&gt;();<br>
-                    <br>
-                    &nbsp;&nbsp;public Optional&lt;Student&gt; findById(Long id) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return students.stream().filter(student -&gt; student.getId().equals(id)).findFirst();<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>2. Bean Validation</h2>
-            <p>Spring MVC integrates with JSR-380 (Bean Validation 2.0) for validating beans. Example:</p>
-            <h3>Model with Validation Annotations</h3>
-            <div class="code">
-                <code>import javax.validation.constraints.Email;<br>
-                import javax.validation.constraints.NotEmpty;<br>
-                <br>
-                public class Student {<br>
-                    &nbsp;&nbsp;private Long id;<br>
-                    <br>
-                    &nbsp;&nbsp;@NotEmpty(message = "Name is required")<br>
-                    &nbsp;&nbsp;private String name;<br>
-                    <br>
-                    &nbsp;&nbsp;@Email(message = "Email should be valid")<br>
-                    &nbsp;&nbsp;@NotEmpty(message = "Email is required")<br>
-                    &nbsp;&nbsp;private String email;<br>
-                    <br>
-                    &nbsp;&nbsp;// Getters and Setters<br>
-                }</code>
-            </div>
-
-            <h3>Controller with Validation</h3>
-            <div class="code">
-                <code>@PostMapping<br>
-                public ResponseEntity&lt;Student&gt; addStudent(@Valid @RequestBody Student student, BindingResult result) {<br>
-                    &nbsp;&nbsp;if (result.hasErrors()) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;throw new ValidationException(result);<br>
-                    &nbsp;&nbsp;}<br>
-                    &nbsp;&nbsp;studentService.addStudent(student);<br>
-                    &nbsp;&nbsp;return ResponseEntity.status(HttpStatus.CREATED).body(student);<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>3. Global Exception Handling</h2>
-            <p>Spring MVC allows global exception handling using @ControllerAdvice. Example:</p>
-            <div class="code">
-                <code>@ControllerAdvice<br>
-                public class GlobalExceptionHandler {<br>
-                    &nbsp;&nbsp;@ExceptionHandler(ResourceNotFoundException.class)<br>
-                    &nbsp;&nbsp;public ResponseEntity&lt;String&gt; handleResourceNotFoundException(ResourceNotFoundException ex) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());<br>
-                    &nbsp;&nbsp;}<br>
-                    <br>
-                    &nbsp;&nbsp;@ExceptionHandler(ValidationException.class)<br>
-                    &nbsp;&nbsp;public ResponseEntity&lt;String&gt; handleValidationException(ValidationException ex) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>4. Downstream Connectivity</h2>
-            <p>Spring MVC can connect to downstream services using RestTemplate or WebClient. Example with RestTemplate:</p>
+            <h3>Setter Injection Example:</h3>
             <div class="code">
                 <code>@Service<br>
-                public class DownstreamService {<br>
-                    &nbsp;&nbsp;private final RestTemplate restTemplate;<br>
+                public class UserService {<br>
+                    &nbsp;&nbsp;private UserRepository userRepository;<br>
                     <br>
-                    &nbsp;&nbsp;public DownstreamService(RestTemplate restTemplate) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;this.restTemplate = restTemplate;<br>
-                    &nbsp;&nbsp;}<br>
-                    <br>
-                    &nbsp;&nbsp;public String getExternalData() {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;String url = "https://api.example.com/data";<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;ResponseEntity&lt;String&gt; response = restTemplate.getForEntity(url, String.class);<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return response.getBody();<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;public void setUserRepository(UserRepository userRepository) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.userRepository = userRepository;<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
+        </div>
 
-            <h3>Configuration for RestTemplate</h3>
+        <div class="section">
+            <h2>2. Use @ComponentScan and @Configuration</h2>
+            <p>Use <code>@ComponentScan</code> to automatically discover and register beans, and <code>@Configuration</code> to define configuration classes.</p>
+            <h3>Example:</h3>
             <div class="code">
                 <code>@Configuration<br>
+                @ComponentScan(basePackages = "com.example.myapp")<br>
                 public class AppConfig {<br>
-                    &nbsp;&nbsp;@Bean<br>
-                    &nbsp;&nbsp;public RestTemplate restTemplate(RestTemplateBuilder builder) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return builder.build();<br>
-                    &nbsp;&nbsp;}<br>
+                    &nbsp;&nbsp;// Define additional beans here if necessary<br>
                 }</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>5. Security</h2>
-            <p>Spring Security provides comprehensive security services for Java applications. Example configuration:</p>
+            <h2>3. Use @Value and @PropertySource for External Configuration</h2>
+            <p>Externalize configuration using property files and the <code>@Value</code> annotation to inject values.</p>
+            <h3>Example:</h3>
             <div class="code">
-                <code>@EnableWebSecurity<br>
-                public class SecurityConfig extends WebSecurityConfigurerAdapter {<br>
-                    &nbsp;&nbsp;@Override<br>
-                    &nbsp;&nbsp;protected void configure(HttpSecurity http) throws Exception {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;http<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.authorizeRequests()<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.antMatchers("/api/**").authenticated()<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.and()<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.httpBasic();<br>
+                <code>@Configuration<br>
+                @PropertySource("classpath:application.properties")<br>
+                public class AppConfig {<br>
+                    &nbsp;&nbsp;@Value("${app.name}")<br>
+                    &nbsp;&nbsp;private String appName;<br>
+                    <br>
+                    &nbsp;&nbsp;// Use appName in your beans<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Use @Profile for Environment Specific Beans</h2>
+            <p>Define beans that should only be available in specific environments using the <code>@Profile</code> annotation.</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@Configuration<br>
+                public class DataSourceConfig {<br>
+                    &nbsp;&nbsp;@Bean<br>
+                    &nbsp;&nbsp;@Profile("development")<br>
+                    &nbsp;&nbsp;public DataSource developmentDataSource() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return new HikariDataSource();<br>
                     &nbsp;&nbsp;}<br>
                     <br>
-                    &nbsp;&nbsp;@Override<br>
-                    &nbsp;&nbsp;protected void configure(AuthenticationManagerBuilder auth) throws Exception {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;auth.inMemoryAuthentication()<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.withUser("user").password("{noop}password").roles("USER");<br>
+                    &nbsp;&nbsp;@Bean<br>
+                    &nbsp;&nbsp;@Profile("production")<br>
+                    &nbsp;&nbsp;public DataSource productionDataSource() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return new HikariDataSource();<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>6. Testing</h2>
-            <p>Spring MVC provides support for testing controllers and services. Example with JUnit and MockMvc:</p>
-            <h3>Controller Test</h3>
+            <h2>5. Use Constructor Injection for Mandatory Dependencies</h2>
+            <p>Always use constructor injection for mandatory dependencies to ensure the required dependencies are available.</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@Service<br>
+                public class OrderService {<br>
+                    &nbsp;&nbsp;private final OrderRepository orderRepository;<br>
+                    <br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;public OrderService(OrderRepository orderRepository) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.orderRepository = orderRepository;<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. Avoid Field Injection</h2>
+            <p>Field injection makes testing difficult and reduces code readability. Prefer constructor or setter injection.</p>
+            <h3>Bad Example (Field Injection):</h3>
+            <div class="code">
+                <code>@Service<br>
+                public class ProductService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private ProductRepository productRepository;<br>
+                }</code>
+            </div>
+
+            <h3>Good Example (Constructor Injection):</h3>
+            <div class="code">
+                <code>@Service<br>
+                public class ProductService {<br>
+                    &nbsp;&nbsp;private final ProductRepository productRepository;<br>
+                    <br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;public ProductService(ProductRepository productRepository) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;this.productRepository = productRepository;<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. Use Spring Profiles to Manage Different Environments</h2>
+            <p>Utilize Spring profiles to configure and manage beans for different environments (e.g., development, testing, production).</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@Configuration<br>
+                @Profile("test")<br>
+                public class TestConfig {<br>
+                    &nbsp;&nbsp;@Bean<br>
+                    &nbsp;&nbsp;public DataSource dataSource() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return new EmbeddedDatabaseBuilder()<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.setType(EmbeddedDatabaseType.H2)<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.build();<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. Use @Transactional for Transaction Management</h2>
+            <p>Annotate methods or classes with <code>@Transactional</code> to handle transaction management declaratively.</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@Service<br>
+                public class PaymentService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private PaymentRepository paymentRepository;<br>
+                    <br>
+                    &nbsp;&nbsp;@Transactional<br>
+                    &nbsp;&nbsp;public void processPayment(Payment payment) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;paymentRepository.save(payment);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;// Additional transactional operations<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>9. Use Spring’s Testing Support</h2>
+            <p>Use Spring's testing support for writing unit and integration tests. Utilize annotations like <code>@RunWith(SpringRunner.class)</code>, <code>@SpringBootTest</code>, and <code>@MockBean</code>.</p>
+            <h3>Example:</h3>
             <div class="code">
                 <code>@RunWith(SpringRunner.class)<br>
-                @WebMvcTest(StudentController.class)<br>
-                public class StudentControllerTest {<br>
+                @SpringBootTest<br>
+                public class UserServiceTest {<br>
                     &nbsp;&nbsp;@Autowired<br>
-                    &nbsp;&nbsp;private MockMvc mockMvc;<br>
+                    &nbsp;&nbsp;private UserService userService;<br>
                     <br>
                     &nbsp;&nbsp;@MockBean<br>
-                    &nbsp;&nbsp;private StudentService studentService;<br>
+                    &nbsp;&nbsp;private UserRepository userRepository;<br>
                     <br>
                     &nbsp;&nbsp;@Test<br>
-                    &nbsp;&nbsp;public void testGetStudentById() throws Exception {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = new Student(1L, "John Doe", "john.doe@example.com");<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;when(studentService.getStudentById(1L)).thenReturn(Optional.of(student));<br>
-                        <br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;mockMvc.perform(get("/api/students/1"))<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(status().isOk())<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.andExpect(jsonPath("$.name").value("John Doe"));<br>
+                    &nbsp;&nbsp;public void testFindUserById() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;when(userRepository.findById(1L)).thenReturn(Optional.of(new User(1L, "John Doe")));<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;User user = userService.findUserById(1L);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertNotNull(user);<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals("John Doe", user.getName());<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
         </div>
 
         <div class="section">
-            <h2>7. Other Important Features</h2>
-            <h3>Content Negotiation</h3>
-            <p>Spring MVC supports content negotiation to serve different data formats like JSON and XML. Example configuration:</p>
+            <h2>10. Use @Cacheable for Caching</h2>
+            <p>Use the <code>@Cacheable</code> annotation to enable caching for methods that are frequently called with the same parameters.</p>
+            <h3>Example:</h3>
             <div class="code">
-                <code>@Configuration<br>
-                public class WebConfig implements WebMvcConfigurer {<br>
-                    &nbsp;&nbsp;@Override<br>
-                    &nbsp;&nbsp;public void configureContentNegotiation(ContentNegotiationConfigurer configurer) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;configurer.favorPathExtension(false)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.favorParameter(true)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.parameterName("format")<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.defaultContentType(MediaType.APPLICATION_JSON)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.mediaType("json", MediaType.APPLICATION_JSON)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.mediaType("xml", MediaType.APPLICATION_XML);<br>
-                    &nbsp;&nbsp;}<br>
-                }</code>
-            </div>
-
-            <h3>HATEOAS</h3>
-            <p>Hypermedia as the Engine of Application State (HATEOAS) is used to create REST APIs that are discoverable. Example:</p>
-            <div class="code">
-                <code>@RestController<br>
-                public class StudentController {<br>
-                    &nbsp;&nbsp;@GetMapping("/{id}")<br>
-                    &nbsp;&nbsp;public EntityModel&lt;Student&gt; getStudentById(@PathVariable Long id) {<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;Student student = studentService.getStudentById(id)<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.orElseThrow(() -&gt; new ResourceNotFoundException("Student not found with id " + id));<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;EntityModel&lt;Student&gt; resource = EntityModel.of(student);<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;WebMvcLinkBuilder linkTo = linkTo(methodOn(this.getClass()).getAllStudents());<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;resource.add(linkTo.withRel("all-students"));<br>
-                        &nbsp;&nbsp;&nbsp;&nbsp;return resource;<br>
+                <code>@Service<br>
+                public class ProductService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private ProductRepository productRepository;<br>
+                    <br>
+                    &nbsp;&nbsp;@Cacheable("products")<br>
+                    &nbsp;&nbsp;public Product getProductById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return productRepository.findById(id).orElse(null);<br>
                     &nbsp;&nbsp;}<br>
                 }</code>
             </div>
         </div>
+
+        <div class="section">
+            <h2>11. Use @Async for Asynchronous Processing</h2>
+            <p>Enable asynchronous processing using the <code>@Async</code> annotation and <code>@EnableAsync</code> configuration.</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@Configuration<br>
+                @EnableAsync<br>
+                public class AsyncConfig {<br>
+                    &nbsp;&nbsp;// Additional configuration if needed<br>
+                }</code>
+            </div>
+            <div class="code">
+                <code>@Service<br>
+                public class NotificationService {<br>
+                    &nbsp;&nbsp;@Async<br>
+                    &nbsp;&nbsp;public void sendNotification(String message) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;// Send notification asynchronously<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>12. Use Spring Boot for Rapid Development</h2>
+            <p>Leverage Spring Boot for rapid application development, automatic configuration, and production-ready features.</p>
+            <h3>Example:</h3>
+            <div class="code">
+                <code>@SpringBootApplication<br>
+                public class Application {<br>
+                    &nbsp;&nbsp;public static void main(String[] args) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;SpringApplication.run(Application.class, args);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
     </div>
 </body>
 </html>
