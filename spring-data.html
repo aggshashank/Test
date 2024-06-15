@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprehensive Guide to Spring Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2, h3 {
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 40px;
+        }
+        .code {
+            background: #f4f4f4;
+            border-left: 3px solid #ccc;
+            padding: 10px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Comprehensive Guide to Spring Data</h1>
+
+        <div class="section">
+            <h2>1. Introduction to Spring Data</h2>
+            <p>Spring Data is a part of the larger Spring Framework that simplifies data access. It provides a consistent and easy-to-use data access framework for relational and non-relational databases, cloud-based data services, and more.</p>
+        </div>
+
+        <div class="section">
+            <h2>2. Setting Up the Environment</h2>
+            <p>To get started with Spring Data, you need to set up your environment.</p>
+
+            <h3>Step 1: Add Dependencies</h3>
+            <p>Add the necessary dependencies in your `pom.xml` for a Spring Boot application with Spring Data JPA and H2 database.</p>
+            <div class="code">
+                <code>&lt;dependencies&gt;<br>
+                    &nbsp;&nbsp;&lt;dependency&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;<br>
+                    &nbsp;&nbsp;&lt;/dependency&gt;<br>
+                    &nbsp;&nbsp;&lt;dependency&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;groupId&gt;com.h2database&lt;/groupId&gt;<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&lt;artifactId&gt;h2&lt;/artifactId&gt;<br>
+                    &nbsp;&nbsp;&lt;/dependency&gt;<br>
+                &lt;/dependencies&gt;</code>
+            </div>
+
+            <h3>Step 2: Configure Database</h3>
+            <p>Configure the H2 database in your `application.properties` file.</p>
+            <div class="code">
+                <code>spring.datasource.url=jdbc:h2:mem:testdb<br>
+                spring.datasource.driverClassName=org.h2.Driver<br>
+                spring.datasource.username=sa<br>
+                spring.datasource.password=password<br>
+                spring.jpa.database-platform=org.hibernate.dialect.H2Dialect</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. Defining the Models</h2>
+            <p>Define the `Account` and `Customer` entities.</p>
+
+            <h3>Account.java</h3>
+            <div class="code">
+                <code>import javax.persistence.*;<br><br>
+                @Entity<br>
+                public class Account {<br>
+                    &nbsp;&nbsp;@Id<br>
+                    &nbsp;&nbsp;@GeneratedValue(strategy = GenerationType.IDENTITY)<br>
+                    &nbsp;&nbsp;private Long accountId;<br><br>
+                    &nbsp;&nbsp;private String accountType;<br>
+                    &nbsp;&nbsp;private String accountStatus;<br><br>
+                    &nbsp;&nbsp;@ManyToOne<br>
+                    &nbsp;&nbsp;@JoinColumn(name = "customer_id")<br>
+                    &nbsp;&nbsp;private Customer customer;<br><br>
+                    &nbsp;&nbsp;// Getters and Setters<br>
+                    &nbsp;&nbsp;public Long getAccountId() { return accountId; }<br>
+                    &nbsp;&nbsp;public void setAccountId(Long accountId) { this.accountId = accountId; }<br>
+                    &nbsp;&nbsp;public String getAccountType() { return accountType; }<br>
+                    &nbsp;&nbsp;public void setAccountType(String accountType) { this.accountType = accountType; }<br>
+                    &nbsp;&nbsp;public String getAccountStatus() { return accountStatus; }<br>
+                    &nbsp;&nbsp;public void setAccountStatus(String accountStatus) { this.accountStatus = accountStatus; }<br>
+                    &nbsp;&nbsp;public Customer getCustomer() { return customer; }<br>
+                    &nbsp;&nbsp;public void setCustomer(Customer customer) { this.customer = customer; }<br>
+                }</code>
+            </div>
+
+            <h3>Customer.java</h3>
+            <div class="code">
+                <code>import javax.persistence.*;<br>
+                import java.util.List;<br><br>
+                @Entity<br>
+                public class Customer {<br>
+                    &nbsp;&nbsp;@Id<br>
+                    &nbsp;&nbsp;@GeneratedValue(strategy = GenerationType.IDENTITY)<br>
+                    &nbsp;&nbsp;private Long customerId;<br><br>
+                    &nbsp;&nbsp;private String customerName;<br>
+                    &nbsp;&nbsp;private String customerStatus;<br>
+                    &nbsp;&nbsp;private String customerProfile;<br><br>
+                    &nbsp;&nbsp;@OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)<br>
+                    &nbsp;&nbsp;private List&lt;Account&gt; accounts;<br><br>
+                    &nbsp;&nbsp;// Getters and Setters<br>
+                    &nbsp;&nbsp;public Long getCustomerId() { return customerId; }<br>
+                    &nbsp;&nbsp;public void setCustomerId(Long customerId) { this.customerId = customerId; }<br>
+                    &nbsp;&nbsp;public String getCustomerName() { return customerName; }<br>
+                    &nbsp;&nbsp;public void setCustomerName(String customerName) { this.customerName = customerName; }<br>
+                    &nbsp;&nbsp;public String getCustomerStatus() { return customerStatus; }<br>
+                    &nbsp;&nbsp;public void setCustomerStatus(String customerStatus) { this.customerStatus = customerStatus; }<br>
+                    &nbsp;&nbsp;public String getCustomerProfile() { return customerProfile; }<br>
+                    &nbsp;&nbsp;public void setCustomerProfile(String customerProfile) { this.customerProfile = customerProfile; }<br>
+                    &nbsp;&nbsp;public List&lt;Account&gt; getAccounts() { return accounts; }<br>
+                    &nbsp;&nbsp;public void setAccounts(List&lt;Account&gt; accounts) { this.accounts = accounts; }<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. Creating Repositories</h2>
+            <p>Create Spring Data JPA repositories for `Account` and `Customer` entities.</p>
+
+            <h3>AccountRepository.java</h3>
+            <div class="code">
+                <code>import org.springframework.data.jpa.repository.JpaRepository;<br><br>
+                public interface AccountRepository extends JpaRepository&lt;Account, Long&gt; {<br>
+                    &nbsp;&nbsp;// Custom query methods can be added here<br>
+                }</code>
+            </div>
+
+            <h3>CustomerRepository.java</h3>
+            <div class="code">
+                <code>import org.springframework.data.jpa.repository.JpaRepository;<br><br>
+                public interface CustomerRepository extends JpaRepository&lt;Customer, Long&gt; {<br>
+                    &nbsp;&nbsp;// Custom query methods can be added here<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>5. Basic CRUD Operations</h2>
+            <p>Demonstrate basic CRUD operations using the repositories.</p>
+
+            <h3>AccountService.java</h3>
+            <div class="code">
+                <code>import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.stereotype.Service;<br><br>
+                import java.util.List;<br><br>
+                @Service<br>
+                public class AccountService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private AccountRepository accountRepository;<br><br>
+                    &nbsp;&nbsp;public List&lt;Account&gt; getAllAccounts() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.findAll();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Account getAccountById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.findById(id).orElse(null);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Account createOrUpdateAccount(Account account) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.save(account);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public void deleteAccount(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;accountRepository.deleteById(id);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+
+            <h3>CustomerService.java</h3>
+            <div class="code">
+                <code>import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.stereotype.Service;<br><br>
+                import java.util.List;<br><br>
+                @Service<br>
+                public class CustomerService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private CustomerRepository customerRepository;<br><br>
+                    &nbsp;&nbsp;public List&lt;Customer&gt; getAllCustomers() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return customerRepository.findAll();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Customer getCustomerById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return customerRepository.findById(id).orElse(null);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Customer createOrUpdateCustomer(Customer customer) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return customerRepository.save(customer);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public void deleteCustomer(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;customerRepository.deleteById(id);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>6. Complex Query Methods</h2>
+            <p>Demonstrate more complex query methods, such as finding all accounts for a customer.</p>
+
+            <h3>AccountRepository.java</h3>
+            <div class="code">
+                <code>import org.springframework.data.jpa.repository.JpaRepository;<br>
+                import java.util.List;<br><br>
+                public interface AccountRepository extends JpaRepository&lt;Account, Long&gt; {<br>
+                    &nbsp;&nbsp;List&lt;Account&gt; findByCustomerCustomerId(Long customerId);<br>
+                }</code>
+            </div>
+
+            <h3>AccountService.java</h3>
+            <div class="code">
+                <code>import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.stereotype.Service;<br><br>
+                import java.util.List;<br><br>
+                @Service<br>
+                public class AccountService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private AccountRepository accountRepository;<br><br>
+                    &nbsp;&nbsp;public List&lt;Account&gt; getAllAccounts() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.findAll();<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Account getAccountById(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.findById(id).orElse(null);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public List&lt;Account&gt; getAccountsByCustomerId(Long customerId) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.findByCustomerCustomerId(customerId);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public Account createOrUpdateAccount(Account account) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return accountRepository.save(account);<br>
+                    &nbsp;&nbsp;}<br><br>
+                    &nbsp;&nbsp;public void deleteAccount(Long id) {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;accountRepository.deleteById(id);<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>7. Using Projections</h2>
+            <p>Projections can be used to select specific columns from the database instead of fetching entire entities.</p>
+
+            <h3>CustomerProjection.java</h3>
+            <div class="code">
+                <code>public interface CustomerProjection {<br>
+                    &nbsp;&nbsp;String getCustomerName();<br>
+                    &nbsp;&nbsp;String getCustomerStatus();<br>
+                }</code>
+            </div>
+
+            <h3>CustomerRepository.java</h3>
+            <div class="code">
+                <code>import org.springframework.data.jpa.repository.JpaRepository;<br>
+                import org.springframework.data.jpa.repository.Query;<br>
+                import java.util.List;<br><br>
+                public interface CustomerRepository extends JpaRepository&lt;Customer, Long&gt; {<br>
+                    &nbsp;&nbsp;@Query("SELECT c.customerName as customerName, c.customerStatus as customerStatus FROM Customer c")<br>
+                    &nbsp;&nbsp;List&lt;CustomerProjection&gt; findAllCustomerProjections();<br>
+                }</code>
+            </div>
+
+            <h3>CustomerService.java</h3>
+            <div class="code">
+                <code>import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.stereotype.Service;<br>
+                import java.util.List;<br><br>
+                @Service<br>
+                public class CustomerService {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private CustomerRepository customerRepository;<br><br>
+                    &nbsp;&nbsp;public List&lt;CustomerProjection&gt; getAllCustomerProjections() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;return customerRepository.findAllCustomerProjections();<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>8. Testing Spring Data Repositories</h2>
+            <p>Demonstrate how to test Spring Data repositories using @DataJpaTest.</p>
+
+            <h3>AccountRepositoryTest.java</h3>
+            <div class="code">
+                <code>import org.junit.jupiter.api.Test;<br>
+                import org.springframework.beans.factory.annotation.Autowired;<br>
+                import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;<br><br>
+                import java.util.List;<br><br>
+                import static org.junit.jupiter.api.Assertions.*;<br><br>
+                @DataJpaTest<br>
+                public class AccountRepositoryTest {<br>
+                    &nbsp;&nbsp;@Autowired<br>
+                    &nbsp;&nbsp;private AccountRepository accountRepository;<br><br>
+                    &nbsp;&nbsp;@Test<br>
+                    &nbsp;&nbsp;public void testFindByCustomerCustomerId() {<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Customer customer = new Customer();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;customer.setCustomerName("John Doe");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;customer.setCustomerStatus("Active");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;customer.setCustomerProfile("Profile 1");<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;Account account = new Account();<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;account.setAccountType("Checking");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;account.setAccountStatus("Open");<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;account.setCustomer(customer);<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;customer.setAccounts(List.of(account));<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;accountRepository.save(account);<br><br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;List&lt;Account&gt; accounts = accountRepository.findByCustomerCustomerId(customer.getCustomerId());<br>
+                        &nbsp;&nbsp;&nbsp;&nbsp;assertEquals(1, accounts.size());<br>
+                    &nbsp;&nbsp;}<br>
+                }</code>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>9. Best Practices</h2>
+            <ul>
+                <li>Use meaningful method names in repositories to auto-generate queries.</li>
+                <li>Prefer JPA annotations over XML configurations for simplicity.</li>
+                <li>Use projections to optimize query performance when only a subset of fields is needed.</li>
+                <li>Leverage Spring Data's auditing capabilities to track entity changes.</li>
+                <li>Write comprehensive tests to ensure the correctness of repository methods.</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>10. References</h2>
+            <ul>
+                <li><a href="https://spring.io/projects/spring-data-jpa">Spring Data JPA</a> - Official Spring Data JPA documentation</li>
+                <li><a href="https://docs.spring.io/spring-data/jpa/docs/current/reference/html/#reference">Spring Data JPA Reference</a> - Detailed reference guide for Spring Data JPA</li>
+                <li><a href="https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#boot-features-jpa-and-spring-data">Spring Boot and Spring Data JPA</a> - Spring Boot documentation on integrating with Spring Data JPA</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
