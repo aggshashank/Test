@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Copilot User Cases Documentation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #0779e4 3px solid;
+        }
+        header a {
+            color: #fff;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+        }
+        header ul {
+            padding: 0;
+            list-style: none;
+        }
+        header li {
+            display: inline;
+            padding: 0 20px 0 20px;
+        }
+        #main {
+            padding: 30px;
+            background: #fff;
+        }
+        #main h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            font-size: 20px;
+            color: #333;
+        }
+        .experience {
+            background: #e2e2e2;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .experience h3 {
+            font-size: 18px;
+        }
+        .experience p {
+            font-size: 16px;
+        }
+        .add-experience {
+            margin-top: 20px;
+        }
+        .add-experience input, .add-experience textarea, .add-experience select {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>GitHub Copilot User Cases</h1>
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#user-cases">User Cases</a></li>
+                <li><a href="#add-experience">Add Experience</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <section id="main" class="container">
+        <div id="introduction" class="section">
+            <h1>Introduction</h1>
+            <p>This documentation provides an overview of various user cases related to GitHub Copilot. It also allows engineers to share their experiences and useful prompts.</p>
+        </div>
+
+        <div id="user-cases" class="section">
+            <h1>User Cases</h1>
+            <div class="experience">
+                <h3>User Case 1: Code Completion</h3>
+                <p>Description: Using GitHub Copilot for code completion and suggestions while writing code.</p>
+                <p>Example Prompts: "Complete the function for data processing", "Suggest improvements for the following code snippet"</p>
+            </div>
+            <div class="experience">
+                <h3>User Case 2: Learning New Libraries</h3>
+                <p>Description: Leveraging GitHub Copilot to learn and integrate new libraries in a project.</p>
+                <p>Example Prompts: "Show example usage of pandas for data manipulation", "How to use Spring Boot for REST API development"</p>
+            </div>
+            <!-- Add more user cases as needed -->
+        </div>
+
+        <div id="add-experience" class="section">
+            <h1>Add Your Experience</h1>
+            <form class="add-experience">
+                <label for="user-case">Select User Case</label>
+                <select id="user-case" name="user-case">
+                    <option value="code-completion">Code Completion</option>
+                    <option value="learning-new-libraries">Learning New Libraries</option>
+                    <!-- Add more options as needed -->
+                </select>
+                
+                <label for="experience-title">Title</label>
+                <input type="text" id="experience-title" name="experience-title" required>
+                
+                <label for="experience-description">Description</label>
+                <textarea id="experience-description" name="experience-description" rows="4" required></textarea>
+                
+                <label for="experience-prompts">Example Prompts</label>
+                <textarea id="experience-prompts" name="experience-prompts" rows="4" required></textarea>
+                
+                <input type="submit" value="Add Experience">
+            </form>
+        </div>
+    </section>
+</body>
+</html>
