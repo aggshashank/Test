@@ -1,0 +1,72 @@
+swagger: "2.0"
+info:
+  description: "This is a sample API for MongoDB operations"
+  version: "1.0.0"
+  title: "MongoDB REST API"
+host: "localhost:8080"
+basePath: "/api"
+tags:
+- name: "MongoDB Operations"
+  description: "Operations for MongoDB"
+schemes:
+- "http"
+paths:
+  /documents:
+    get:
+      tags:
+      - "MongoDB Operations"
+      summary: "Retrieve documents from a collection"
+      description: "Retrieve documents based on collection name and attribute key-value"
+      operationId: "getDocuments"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "collectionName"
+        in: "query"
+        description: "Collection name"
+        required: true
+        type: "string"
+      - name: "key"
+        in: "query"
+        description: "Attribute key"
+        required: true
+        type: "string"
+      - name: "value"
+        in: "query"
+        description: "Attribute value"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+              type: "object"
+    post:
+      tags:
+      - "MongoDB Operations"
+      summary: "Add a document to a collection"
+      description: "Add a new document to the specified collection"
+      operationId: "addDocument"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "collectionName"
+        in: "path"
+        description: "Collection name"
+        required: true
+        type: "string"
+      - name: "body"
+        in: "body"
+        description: "Document to add"
+        required: true
+        schema:
+          type: "object"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "object"
